@@ -55,6 +55,14 @@ contract Referral is ReentrancyGuard {
             users[_referrer].referrer != msg.sender,
             "Referrer cannot be the sender"
         );
+
+        //require that the referrer has referrer less than 9 people
+        require(
+            users[_referrer].totalReferrals < 9,
+            "Referrer has already referred 9 people"
+        );
+        //require that the referrer is less than 10 levels
+        require(users[_referrer].level < 10, "Referrer is already at level 10");
         _;
     }
 
@@ -95,7 +103,7 @@ contract Referral is ReentrancyGuard {
     function levelUp(address _user) public payable {
         //require that the user has referred 9 people
         require(
-            users[_user].totalReferrals % 9 == 0,
+            users[_user].totalReferrals == 9,
             "User has not referred 9 people"
         );
         //require that the user has paid 0.5 eth to the contract
@@ -104,6 +112,8 @@ contract Referral is ReentrancyGuard {
         require(users[_user].level < 10, "User is already at level 10");
         //update the user's level
         users[_user].level++;
+        //update the user's total referrals
+        users[_user].totalReferrals = 0;
     }
 
     function withdraw() public {

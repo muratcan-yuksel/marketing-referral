@@ -21,7 +21,7 @@ contract Referral is ReentrancyGuard {
 
     uint256 public constant REGISTRATION_FEE = 0.25 ether;
     uint8 public constant REFERRAL_PERCENTAGE = 70;
-    uint8 public constant BONUS_REFERRALS = 3;
+    uint8 public constant BONUS_REFERRALS = 2;
     uint8 public constant BONUS_PERCENTAGE = 50;
 
     constructor() {
@@ -85,17 +85,17 @@ contract Referral is ReentrancyGuard {
     function transferPayment(address _referrer, uint256 _amount) private {
         uint256 referralAmount = (_amount * REFERRAL_PERCENTAGE) / 100;
         uint256 businessAmount = _amount - referralAmount;
-        console.log("referral", referralAmount);
-        console.log("biz", businessAmount);
+        // console.log("referral", referralAmount);
+        // console.log("biz", businessAmount);
         if (
             users[_referrer].totalReferrals > 1 &&
-            users[_referrer].totalReferrals % BONUS_REFERRALS == 0
+            (users[_referrer].totalReferrals + 1) % 3 == 0
         ) {
             referralAmount = (_amount * BONUS_PERCENTAGE) / 100;
             businessAmount = _amount - referralAmount;
         }
         payable(_referrer).transfer(referralAmount);
-        //business amount should be sent to the owner
+        //business amount should be sent to the owner/ no, it should be sent to the contract
 
         // payable(owner).transfer(businessAmount);
     }

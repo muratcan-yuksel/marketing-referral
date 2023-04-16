@@ -195,6 +195,7 @@ describe("User interactions", function () {
       })
     ).to.be.revertedWith("User has not referred 9 people");
   });
+
   describe("payment transfer", () => {
     it("should have a balance of 0 ETH initially", async function () {
       const contractBalance = await ethers.provider.getBalance(
@@ -202,7 +203,7 @@ describe("User interactions", function () {
       );
       expect(contractBalance).to.equal(0);
     });
-    it("after the initial user, it should have more than 0 ether", async function () {
+    it("after the initial user, the contract should have more than 0 ether", async function () {
       await referralContract.connect(user1).register(owner.address, {
         value: ethers.utils.parseEther("0.25"),
       });
@@ -210,13 +211,40 @@ describe("User interactions", function () {
         referralContract.address
       );
 
-      console.log(contractBalance.toString());
+      console.log(Number(contractBalance));
 
       expect(contractBalance).to.be.gt(0);
-
-      it("the owner should have 0.75 ether after the initial user", async function () {
+      //inside test
+      it("the contract should have 0.75 ether after the initial user", async function () {
         expect(contractBalance).to.be.equal(0.75);
       });
+    });
+    it("after the 3rd user, the contract should have X amount of money", async function () {
+      const [owner, user1, user2, user3, user4, user5, user6, user7, user8] =
+        await ethers.getSigners();
+      await referralContract.connect(user1).register(owner.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+
+      await referralContract.connect(user2).register(user1.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+
+      await referralContract.connect(user3).register(user1.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+
+      await referralContract.connect(user4).register(user1.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+
+      const contractBalance = await ethers.provider.getBalance(
+        referralContract.address
+      );
+
+      console.log(Number(contractBalance));
+
+      expect(contractBalance).to.be.gt(0);
     });
   });
 });

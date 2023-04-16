@@ -55,12 +55,17 @@ contract Referral is ReentrancyGuard {
     function register(
         address _referrer
     ) public payable validRegistration(_referrer) {
-        users[msg.sender] = User({
-            referrer: _referrer,
-            totalReferrals: 0,
-            level: 1
-            // totalReferralEarnings: 0
-        });
+        // users[msg.sender] = User({
+        //     referrer: _referrer,
+        //     totalReferrals: 0,
+        //     level: 1
+        //     // totalReferralEarnings: 0
+        // });
+
+        User storage newUser = users[msg.sender];
+        newUser.referrer = _referrer;
+        newUser.totalReferrals = 0;
+        newUser.level = 1;
 
         console.log("User registered: %s", msg.sender);
         console.log("Referrer: %s", _referrer);

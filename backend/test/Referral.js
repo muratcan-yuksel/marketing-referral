@@ -18,5 +18,12 @@ describe("Referral", function () {
     await referralContract.connect(user1).register(owner.address, {
       value: ethers.utils.parseEther("0.25"),
     });
+
+    // console.log("user", user1.address);
+    // console.log(await referralContract.users(user1.address));
+    let user = await referralContract.users(user1.address);
+    // console.log(user.referrer);
+
+    expect(user.referrer).to.equal(owner.address);
   });
 });

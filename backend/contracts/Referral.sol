@@ -26,6 +26,10 @@ contract Referral is ReentrancyGuard {
 
     constructor() {
         owner = msg.sender;
+        User storage firstUser = users[owner];
+        firstUser.referrer = address(0);
+        firstUser.totalReferrals = 0;
+        firstUser.level = 1;
     }
 
     modifier validRegistration(address _referrer) {
@@ -41,10 +45,12 @@ contract Referral is ReentrancyGuard {
             _referrer != address(0) && _referrer != msg.sender,
             "Invalid referrer"
         );
-        // require(
-        //     users[_referrer].referrer != address(0),
-        //     "Referrer has not registered"
-        // );
+        if (_referrer != owner) {
+            require(
+                users[_referrer].referrer != address(0),
+                "Referrer does not exist"
+            );
+        }
         require(
             users[_referrer].referrer != msg.sender,
             "Referrer cannot be the sender"
@@ -55,13 +61,6 @@ contract Referral is ReentrancyGuard {
     function register(
         address _referrer
     ) public payable validRegistration(_referrer) {
-        // users[msg.sender] = User({
-        //     referrer: _referrer,
-        //     totalReferrals: 0,
-        //     level: 1
-        //     // totalReferralEarnings: 0
-        // });
-
         User storage newUser = users[msg.sender];
         newUser.referrer = _referrer;
         newUser.totalReferrals = 0;

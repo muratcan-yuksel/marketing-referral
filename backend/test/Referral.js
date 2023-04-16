@@ -214,12 +214,18 @@ describe("User interactions", function () {
       console.log(Number(contractBalance));
 
       expect(contractBalance).to.be.gt(0);
-      //inside test
-      it("the contract should have 0.75 ether after the initial user", async function () {
-        expect(contractBalance).to.be.equal(0.75);
-      });
     });
-    it("after the 3rd user, the contract should have X amount of money", async function () {
+
+    it("the contract should have 0.75 ether after the initial user", async function () {
+      await referralContract.connect(user1).register(owner.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+      const contractBalance = await ethers.provider.getBalance(
+        referralContract.address
+      );
+      expect(contractBalance).to.be.equal(ethers.utils.parseEther("0.075"));
+    });
+    it("after the 3rd user, the contract should have 0.35 amount of money", async function () {
       const [owner, user1, user2, user3, user4, user5, user6, user7, user8] =
         await ethers.getSigners();
       await referralContract.connect(user1).register(owner.address, {
@@ -244,7 +250,7 @@ describe("User interactions", function () {
 
       console.log(Number(contractBalance));
 
-      expect(contractBalance).to.be.gt(0);
+      expect(contractBalance).to.be.equal(ethers.utils.parseEther("0.35"));
     });
   });
 });

@@ -123,4 +123,100 @@ describe("User interactions", function () {
       })
     ).to.be.revertedWith("Referrer has already referred 9 people");
   });
+
+  describe("User level up", function () {
+    beforeEach(async function () {
+      //register users functionality
+      let numUsers = 11;
+      const signers = [];
+      //create 9 users, user index 0 is the owner, user index 1 is user1, that's why we start from 2 to 11 = 9 users
+      for (let i = 2; i < numUsers; i++) {
+        const userName = `user${i}`;
+        const signer = await ethers.getSigner(i);
+        signers.push({ name: userName, signer: signer });
+      }
+      // console.log(signers.length);
+      // console.log(user1);
+      //register the user1 to the owner
+      await referralContract.connect(user1).register(owner.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+      //register the 9 users to user1
+      for (let i = 0; i < signers.length; i++) {
+        await referralContract
+          .connect(signers[i].signer)
+          .register(user1.address, {
+            value: ethers.utils.parseEther("0.25"),
+          });
+      }
+      //register users done});
+    });
+    it("user1 can level up to level 2 after inviting 9 users and paying 0.5 ether", async function () {
+      //level up functionality
+      await referralContract.connect(user1).levelUp({
+        value: ethers.utils.parseEther("0.5"),
+      });
+    });
+    it("user1 can NOT level up to level 2 after inviting 9 users and paying 0.4 ether", async function () {
+      //level up functionality
+      await expect(
+        referralContract.connect(user1).levelUp({
+          value: ethers.utils.parseEther("0.4"),
+        })
+      ).to.be.revertedWith("User has not paid 0.5 ether");
+    });
+  });
+  //this test is a standalone
+  it("user cannot call the level up function before inviting 9 users", async function () {
+    const numUsers = 5;
+    const signers = [];
+    //create 9 users, user index 0 is the owner, user index 1 is user1, that's why we start from 2 to 11 = 9 users
+    for (let i = 2; i < numUsers; i++) {
+      const userName = `user${i}`;
+      const signer = await ethers.getSigner(i);
+      signers.push({ name: userName, signer: signer });
+    }
+
+    //register the user1 to the owner
+    await referralContract.connect(user1).register(owner.address, {
+      value: ethers.utils.parseEther("0.25"),
+    });
+    for (let i = 0; i < signers.length; i++) {
+      await referralContract
+        .connect(signers[i].signer)
+        .register(user1.address, {
+          value: ethers.utils.parseEther("0.25"),
+        });
+    }
+    //cannot call level up function
+    await expect(
+      referralContract.connect(user1).levelUp({
+        value: ethers.utils.parseEther("0.5"),
+      })
+    ).to.be.revertedWith("User has not referred 9 people");
+  });
+  describe("payment transfer", () => {
+    it("should have a balance of 0 ETH initially", async function () {
+      const contractBalance = await ethers.provider.getBalance(
+        referralContract.address
+      );
+      expect(contractBalance).to.equal(0);
+    });
+    it("after the initial user, it should have more than 0 ether", async function () {
+      await referralContract.connect(user1).register(owner.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+      const contractBalance = await ethers.provider.getBalance(
+        referralContract.address
+      );
+
+      console.log(contractBalance.toString());
+
+      expect(contractBalance).to.be.gt(0);
+
+      it("the owner should have 0.75 ether after the initial user", async function () {
+        expect(contractBalance).to.be.equal(0.75);
+      });
+    });
+  });
 });

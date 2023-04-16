@@ -74,9 +74,9 @@ contract Referral is ReentrancyGuard {
         newUser.totalReferrals = 0;
         newUser.level = 1;
 
-        console.log("User registered: %s", msg.sender);
-        console.log("Referrer: %s", _referrer);
-        console.log(msg.value);
+        // console.log("User registered: %s", msg.sender);
+        // console.log("Referrer: %s", _referrer);
+        // console.log(msg.value);
 
         transferPayment(_referrer, msg.value);
         updateReferralCount(_referrer);
@@ -85,14 +85,19 @@ contract Referral is ReentrancyGuard {
     function transferPayment(address _referrer, uint256 _amount) private {
         uint256 referralAmount = (_amount * REFERRAL_PERCENTAGE) / 100;
         uint256 businessAmount = _amount - referralAmount;
-        if (users[_referrer].totalReferrals % BONUS_REFERRALS == 0) {
+        console.log("referral", referralAmount);
+        console.log("biz", businessAmount);
+        if (
+            users[_referrer].totalReferrals > 1 &&
+            users[_referrer].totalReferrals % BONUS_REFERRALS == 0
+        ) {
             referralAmount = (_amount * BONUS_PERCENTAGE) / 100;
             businessAmount = _amount - referralAmount;
         }
         payable(_referrer).transfer(referralAmount);
         //business amount should be sent to the owner
 
-        payable(owner).transfer(businessAmount);
+        // payable(owner).transfer(businessAmount);
     }
 
     function updateReferralCount(address _referrer) private {
@@ -100,20 +105,20 @@ contract Referral is ReentrancyGuard {
     }
 
     //if the user has referred 9 people, they can call this function to pay 0.5 eth to the contract and level up
-    function levelUp(address _user) public payable {
+    function levelUp() public payable {
         //require that the user has referred 9 people
         require(
-            users[_user].totalReferrals == 9,
+            users[msg.sender].totalReferrals == 9,
             "User has not referred 9 people"
         );
         //require that the user has paid 0.5 eth to the contract
         require(msg.value == 0.5 ether, "User has not paid 0.5 ether");
         //require that the user is less than 9 levels
-        require(users[_user].level < 10, "User is already at level 10");
+        require(users[msg.sender].level < 10, "User is already at level 10");
         //update the user's level
-        users[_user].level++;
+        users[msg.sender].level++;
         //update the user's total referrals
-        users[_user].totalReferrals = 0;
+        users[msg.sender].totalReferrals = 0;
     }
 
     function withdraw() public {

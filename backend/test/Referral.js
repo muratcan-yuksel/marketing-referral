@@ -2,20 +2,21 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("Referral", function () {
-  let owner, deployerAddress;
-  before("contract setup", async function () {
+  let Referral, referralContract, owner, user1, user2;
+  beforeEach(async function () {
     Referral = await ethers.getContractFactory("Referral");
-    referral = await Referral.deploy();
-    await referral.deployed();
-
-    // Get the contract owner
-    owner = await referral.owner();
-    //console log the address of the wallet who deployed the contract
-    deployerAddress = referral.deployTransaction.from;
+    referralContract = await Referral.deploy();
+    await referralContract.deployed();
+    //get the deployer address
+    [owner, user1, user2] = await ethers.getSigners();
   });
-  it("the owner should bethe deployer of the contract", async function () {
-    console.log("Owner: ", owner);
-    console.log("Deployer address:", deployerAddress);
-    expect(owner).to.equal(deployerAddress);
+  it("Should set the deployer as the owner", async function () {
+    owner = await referralContract.owner();
+    expect(await referralContract.owner()).to.equal(owner);
+  });
+  it("should register user", async function () {
+    await referralContract.connect(user1).register(owner.address, {
+      value: ethers.utils.parseEther("0.25"),
+    });
   });
 });

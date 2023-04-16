@@ -4,6 +4,9 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+//import hardhat console log
+import "hardhat/console.sol";
+
 contract Referral is ReentrancyGuard {
     using SafeMath for uint256;
     struct User {
@@ -38,10 +41,10 @@ contract Referral is ReentrancyGuard {
             _referrer != address(0) && _referrer != msg.sender,
             "Invalid referrer"
         );
-        require(
-            users[_referrer].referrer != address(0),
-            "Referrer has not registered"
-        );
+        // require(
+        //     users[_referrer].referrer != address(0),
+        //     "Referrer has not registered"
+        // );
         require(
             users[_referrer].referrer != msg.sender,
             "Referrer cannot be the sender"
@@ -59,6 +62,10 @@ contract Referral is ReentrancyGuard {
             // totalReferralEarnings: 0
         });
 
+        console.log("User registered: %s", msg.sender);
+        console.log("Referrer: %s", _referrer);
+        console.log(msg.value);
+
         transferPayment(_referrer, msg.value);
         updateReferralCount(_referrer);
     }
@@ -71,9 +78,9 @@ contract Referral is ReentrancyGuard {
             businessAmount = _amount - referralAmount;
         }
         payable(_referrer).transfer(referralAmount);
-        //business amount should be sent to the contract address
-        //not the owner
-        payable(address(this)).transfer(businessAmount);
+        //business amount should be sent to the owner
+
+        payable(owner).transfer(businessAmount);
     }
 
     function updateReferralCount(address _referrer) private {
@@ -98,5 +105,13 @@ contract Referral is ReentrancyGuard {
     function withdraw() public {
         require(msg.sender == owner, "Only owner can withdraw");
         payable(owner).transfer(address(this).balance);
+    }
+
+    fallback() external payable {
+        revert("Invalid function call");
+    }
+
+    receive() external payable {
+        revert("Received ether without a function call");
     }
 }

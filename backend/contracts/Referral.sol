@@ -13,7 +13,7 @@ contract Referral is ReentrancyGuard {
         address referrer;
         uint8 totalReferrals;
         uint8 level;
-        // uint256 totalReferralEarnings;
+        uint256 earnings;
     }
 
     address public owner;
@@ -30,6 +30,7 @@ contract Referral is ReentrancyGuard {
         firstUser.referrer = address(0);
         firstUser.totalReferrals = 0;
         firstUser.level = 1;
+        firstUser.earnings = 0;
     }
 
     modifier validRegistration(address _referrer) {
@@ -95,6 +96,8 @@ contract Referral is ReentrancyGuard {
             businessAmount = _amount - referralAmount;
         }
         payable(_referrer).transfer(referralAmount);
+        //update earnings
+        users[_referrer].earnings += referralAmount;
         //business amount should be sent to the owner/ no, it should be sent to the contract
 
         // payable(owner).transfer(businessAmount);
@@ -102,6 +105,24 @@ contract Referral is ReentrancyGuard {
 
     function updateReferralCount(address _referrer) private {
         users[_referrer].totalReferrals++;
+    }
+
+    function getUserBalance(address userAddress) public view returns (uint256) {
+        return users[userAddress].earnings;
+    }
+
+    function getUserLevel(address userAddress) public view returns (uint8) {
+        return users[userAddress].level;
+    }
+
+    function getUserReferrals(address userAddress) public view returns (uint8) {
+        return users[userAddress].totalReferrals;
+    }
+
+    function getUserReferrer(
+        address userAddress
+    ) public view returns (address) {
+        return users[userAddress].referrer;
     }
 
     //if the user has referred 9 people, they can call this function to pay 0.5 eth to the contract and level up

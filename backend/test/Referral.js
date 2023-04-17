@@ -197,7 +197,7 @@ describe("User interactions", function () {
   });
 
   describe("payment transfer", () => {
-    it("should have a balance of 0 ETH initially", async function () {
+    it("contract should have a balance of 0 ETH initially", async function () {
       const contractBalance = await ethers.provider.getBalance(
         referralContract.address
       );
@@ -214,6 +214,19 @@ describe("User interactions", function () {
       console.log(Number(contractBalance));
 
       expect(contractBalance).to.be.gt(0);
+    });
+
+    it("after user 2, user1 should have 0.175 ether", async function () {
+      const [owner, user1, user2, user3] = await ethers.getSigners();
+      await referralContract.connect(user1).register(owner.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+      await referralContract.connect(user2).register(user1.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+      const userBalance = await referralContract.getUserBalance(user1.address);
+      console.log(Number(userBalance));
+      expect(userBalance).to.be.equal(ethers.utils.parseEther("0.175"));
     });
 
     it("the contract should have 0.75 ether after the initial user", async function () {
@@ -280,6 +293,41 @@ describe("User interactions", function () {
       console.log(Number(contractBalanceAfterWithdraw));
 
       expect(contractBalanceAfterWithdraw).to.be.equal(0);
+    });
+  });
+
+  describe("get user functions works", () => {
+    it("gets the user level", async function () {
+      const [owner, user1, user2] = await ethers.getSigners();
+      await referralContract.connect(user1).register(owner.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+
+      await referralContract.connect(user2).register(user1.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+
+      const userLevel = await referralContract
+        .connect(user1)
+        .getUserLevel(user1.address);
+
+      console.log(Number(userLevel));
+
+      expect(userLevel).to.be.equal(1);
+    });
+    it("gets the user balance", async function () {
+      const [owner, user1, user2, user3] = await ethers.getSigners();
+      await referralContract.connect(user1).register(owner.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+      await referralContract.connect(user2).register(user1.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+      const userBalance = await referralContract
+        .connect(user1)
+        .getUserBalance(user1.address);
+      console.log(Number(userBalance));
+      expect(userBalance).to.be.equal(ethers.utils.parseEther("0.175"));
     });
   });
 });

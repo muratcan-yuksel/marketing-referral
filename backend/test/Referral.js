@@ -225,7 +225,7 @@ describe("User interactions", function () {
       );
       expect(contractBalance).to.be.equal(ethers.utils.parseEther("0.075"));
     });
-    it("after the 3rd user, the contract should have 0.35 amount of money", async function () {
+    it("after the 3rd user, the contract should have 0.35 amount of ether", async function () {
       const [owner, user1, user2, user3, user4, user5, user6, user7, user8] =
         await ethers.getSigners();
       await referralContract.connect(user1).register(owner.address, {
@@ -251,6 +251,35 @@ describe("User interactions", function () {
       console.log(Number(contractBalance));
 
       expect(contractBalance).to.be.equal(ethers.utils.parseEther("0.35"));
+    });
+  });
+  describe("withdraw", () => {
+    it("succesfully withdraws", async function () {
+      const [owner, user1, user2] = await ethers.getSigners();
+      await referralContract.connect(user1).register(owner.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+
+      await referralContract.connect(user2).register(user1.address, {
+        value: ethers.utils.parseEther("0.25"),
+      });
+
+      const contractBalance = await ethers.provider.getBalance(
+        referralContract.address
+      );
+
+      console.log(Number(contractBalance));
+
+      //withdraw
+      await referralContract.connect(owner).withdraw();
+
+      const contractBalanceAfterWithdraw = await ethers.provider.getBalance(
+        referralContract.address
+      );
+
+      console.log(Number(contractBalanceAfterWithdraw));
+
+      expect(contractBalanceAfterWithdraw).to.be.equal(0);
     });
   });
 });

@@ -66,11 +66,60 @@ const Home = () => {
       const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
       const signer = await provider.getSigner();
       console.log(contract);
+      //deployer address here to be removed
       const deployerAddress = await signer.getAddress();
       console.log(deployerAddress);
-      const level = await contract.getUserLevel(deployerAddress);
+      const level = await contract.getUserLevel(walletProvider);
       console.log(Number(level));
       setUserLevel(Number(level));
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  const getBalance = async () => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
+      const signer = await provider.getSigner();
+      console.log(contract);
+      const balance = await contract.getUserBalance(walletProvider);
+      console.log(Number(balance));
+      setEarnings(Number(balance));
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  const levelUp: MouseEventHandler<HTMLButtonElement> = async () => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+      const tx = await contract.levelUp({
+        value: ethers.parseEther("0.5"),
+      });
+      console.log(tx);
+
+      const receipt = await tx.wait();
+
+      console.log(receipt);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  const withdraw: MouseEventHandler<HTMLButtonElement> = async () => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+      const tx = await contract.withdraw();
+      console.log(tx);
+
+      const receipt = await tx.wait();
+
+      console.log(receipt);
     } catch (error) {
       console.log("error", error);
     }
@@ -79,6 +128,7 @@ const Home = () => {
   useEffect(() => {
     walletConnected && console.log(walletProvider);
     getLevel();
+    getBalance();
   }, []);
   return (
     <div className=" h-full bgImage">
@@ -110,15 +160,20 @@ const Home = () => {
 
         <div className="flex justify-around w-full">
           <h1 className="text-3xl">Level: {userLevel} </h1>
-          <h1 className="text-3xl">Earnings: </h1>
+          <h1 className="text-3xl">Earnings:{earnings} </h1>
         </div>
-        <button className="p-4 border text-3xl border-green-600 m-6">
+        <button
+          onClick={levelUp}
+          className="p-4 border text-3xl border-green-600 m-6"
+        >
           Level Up
         </button>
-        <button className="p-4 border text-3xl border-red-600 m-6">
+        <button
+          onClick={withdraw}
+          className="p-4 border text-3xl border-red-600 m-6"
+        >
           Withdraw funds
         </button>
-        <button onClick={getLevel}>get lvl</button>
       </div>
     </div>
   );

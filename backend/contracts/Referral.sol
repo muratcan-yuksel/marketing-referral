@@ -26,11 +26,13 @@ contract Referral is ReentrancyGuard {
 
     constructor() {
         owner = msg.sender;
-        User storage firstUser = users[owner];
-        firstUser.referrer = address(0);
-        firstUser.totalReferrals = 0;
-        firstUser.level = 1;
-        firstUser.earnings = 0;
+        // User storage firstUser = users[owner];
+        //set the first user as deployer
+        users[owner] = User(address(0), 0, 1, 0);
+        // firstUser.referrer = address(0);
+        // firstUser.totalReferrals = 0;
+        // firstUser.level = 1;
+        // firstUser.earnings = 0;
     }
 
     modifier validRegistration(address _referrer) {

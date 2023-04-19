@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, MouseEventHandler } from "react";
 import { BrowserProvider, ethers } from "ethers";
 import { abi } from "../constants/index";
 import backgroundImg from "../public/aurora.jpg";
@@ -14,6 +14,9 @@ const Home = () => {
 
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletProvider, setWalletProvider] = useState<string>();
+  const [referrer, setReferrer] = useState<string>();
+  const [userLevel, setUserLevel] = useState<number>();
+  const [earnings, setEarnings] = useState<number>();
 
   const connectWallet = async () => {
     try {
@@ -39,13 +42,43 @@ const Home = () => {
     }
   };
 
+  const register: MouseEventHandler<HTMLButtonElement> = async () => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+      const tx = await contract.register(referrer, {
+        value: ethers.parseEther("0.25"),
+      });
+      console.log(tx);
+
+      const receipt = await tx.wait();
+
+      console.log(receipt);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  const getLevel = async () => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
+      const signer = await provider.getSigner();
+      console.log(contract);
+      const deployerAddress = await signer.getAddress();
+      console.log(deployerAddress);
+      const level = await contract.getUserLevel(deployerAddress);
+      console.log(Number(level));
+      setUserLevel(Number(level));
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   useEffect(() => {
     walletConnected && console.log(walletProvider);
-    // Listen for disconnect event
-    window.ethereum.on("disconnect", () => {
-      console.log("Wallet disconnected");
-      setWalletConnected(false);
-    });
+    getLevel();
   }, []);
   return (
     <div className=" h-full bgImage">
@@ -66,18 +99,26 @@ const Home = () => {
           type="text "
           className="bg-transparent text-2xl border border-blue-600 border p-2"
           placeholder="Referrer address"
+          onChange={(e) => setReferrer(e.target.value)}
         />
-        <button className="p-4 border text-3xl border-yellow-600 m-6">
+        <button
+          onClick={register}
+          className="p-4 border text-3xl border-yellow-600 m-6"
+        >
           Register
         </button>
 
         <div className="flex justify-around w-full">
-          <h1 className="text-3xl">Level: </h1>
+          <h1 className="text-3xl">Level: {userLevel} </h1>
           <h1 className="text-3xl">Earnings: </h1>
         </div>
+        <button className="p-4 border text-3xl border-green-600 m-6">
+          Level Up
+        </button>
         <button className="p-4 border text-3xl border-red-600 m-6">
           Withdraw funds
         </button>
+        <button onClick={getLevel}>get lvl</button>
       </div>
     </div>
   );

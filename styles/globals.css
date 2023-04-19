@@ -10,3 +10,8 @@ body {
   background-color: black;
   color: whitesmoke;
 }
+/* .bgImage {
+  background-image: url("../public/aurora.jpg");
+  background-size: cover;
+  height: 100vh;
+} */

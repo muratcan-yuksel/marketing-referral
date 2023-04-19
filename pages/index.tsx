@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BrowserProvider, ethers } from "ethers";
 import { abi } from "../constants/index";
+import backgroundImg from "../public/aurora.jpg";
 
 declare global {
   interface Window {
@@ -47,12 +48,37 @@ const Home = () => {
     });
   }, []);
   return (
-    <div>
-      {walletProvider ? (
-        <h1>Wallet Connected: {walletProvider}</h1>
-      ) : (
-        <button onClick={connectWallet}>Connect Wallet</button>
-      )}
+    <div className=" h-full bgImage">
+      <div className="flex justify-end ">
+        {walletProvider ? (
+          <h1>Wallet Connected: {walletProvider}</h1>
+        ) : (
+          <button
+            className="border border-spacing-4 border-blue-500 p-4 text-xl"
+            onClick={connectWallet}
+          >
+            Connect Wallet
+          </button>
+        )}
+      </div>
+      <div className="flex flex-col justify-center items-center h-full ">
+        <input
+          type="text "
+          className="bg-transparent text-2xl border border-blue-600 border p-2"
+          placeholder="Referrer address"
+        />
+        <button className="p-4 border text-3xl border-yellow-600 m-6">
+          Register
+        </button>
+
+        <div className="flex justify-around w-full">
+          <h1 className="text-3xl">Level: </h1>
+          <h1 className="text-3xl">Earnings: </h1>
+        </div>
+        <button className="p-4 border text-3xl border-red-600 m-6">
+          Withdraw funds
+        </button>
+      </div>
     </div>
   );
 };
